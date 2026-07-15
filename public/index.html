@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Policy Assistant — Demo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #0a0a0a;
+  --gray1:   #141414;
+  --gray2:   #1e1e1e;
+  --gray3:   #2c2c2c;
+  --gray4:   #444;
+  --gray5:   #888;
+  --gray6:   #ccc;
+  --white:   #ffffff;
+  --gold:    #C8A96E;
+  --gold-lt: #fdf6e8;
+  --border:  #2a2a2a;
+  --bg:      #0f0f0f;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--black);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.topbar-dot   { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.topbar-name  { font-size: 12px; font-weight: 600; color: var(--gray6); letter-spacing: 0.08em; }
+.demo-badge {
+  background: transparent; border: 1px solid var(--gold);
+  color: var(--gold); font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.1em;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--black);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo-mark {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: var(--black);
+  letter-spacing: -0.5px;
+}
+.header-title h1 { font-size: 1rem; font-weight: 700; color: var(--white); }
+.header-title p  { font-size: 0.7rem; color: var(--gray5); margin-top: 2px; letter-spacing: 0.02em; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.powered-by { font-size: 10px; color: var(--gray4); letter-spacing: 0.06em; }
+.version-badge {
+  background: var(--gray2); border: 1px solid var(--border);
+  color: var(--gray5); font-size: 10px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--black) 0%, var(--gray1) 50%, #1a1a0f 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 32px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: 'GOVERNANCE';
+  position: absolute; top: -10px; right: -20px;
+  font-size: 100px; font-weight: 800; color: rgba(200,169,110,0.04);
+  letter-spacing: -3px; pointer-events: none;
+  white-space: nowrap;
+}
+.hero-inner { max-width: 1040px; margin: 0 auto; position: relative; z-index: 1; }
+.hero-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+.hero h2 { font-size: 1.6rem; font-weight: 700; color: var(--white); margin-bottom: 10px; line-height: 1.25; }
+.hero h2 span { color: var(--gold); }
+.hero p  { font-size: 0.82rem; color: var(--gray5); line-height: 1.7; max-width: 560px; }
+.hero-stats { display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; }
+.stat-num   { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+.stat-label { font-size: 10px; color: var(--gray5); letter-spacing: 0.05em; margin-top: 2px; }
+
+/* ── MAIN ── */
+main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 56px; }
+
+.section-eyebrow {
+  font-size: 10px; font-weight: 700; color: var(--gold);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px;
+}
+
+/* ── POLICY CARDS ── */
+.policies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  gap: 14px; margin-bottom: 32px;
+}
+.policy-card {
+  background: var(--gray1);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 18px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.policy-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.policy-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--gold); border-radius: 12px 0 0 12px;
+  opacity: 0; transition: opacity .2s;
+}
+.policy-card:hover::before { opacity: 1; }
+.policy-num  { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 10px; }
+.policy-icon { font-size: 22px; margin-bottom: 12px; }
+.policy-card h3 { font-size: 0.88rem; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+.policy-card p  { font-size: 0.74rem; color: var(--gray5); line-height: 1.7; }
+.policy-topics  { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.topic-tag {
+  background: var(--gray2); border: 1px solid var(--border);
+  color: var(--gray6); font-size: 0.62rem; font-weight: 500;
+  padding: 2px 9px; border-radius: 20px;
+}
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 26px 0; }
+
+/* ── CHAT ── */
+.chat-container {
+  background: var(--gray1); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+.chat-header {
+  background: var(--black); border-bottom: 1px solid var(--border);
+  padding: 13px 18px; display: flex; align-items: center; justify-content: space-between;
+}
+.chat-header-left { display: flex; align-items: center; gap: 8px; }
+.chat-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.chat-header span { font-size: 0.78rem; font-weight: 600; color: var(--gray6); }
+.chat-header-right { font-size: 10px; color: var(--gray4); }
+
+.chat-messages {
+  padding: 18px 16px; display: flex; flex-direction: column;
+  gap: 14px; min-height: 160px; max-height: 420px; overflow-y: auto;
+}
+.msg { display: flex; gap: 9px; align-items: flex-start; }
+.msg.user { flex-direction: row-reverse; }
+.msg-avatar {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.msg.bot  .msg-avatar { background: var(--gold); color: var(--black); }
+.msg.user .msg-avatar { background: var(--gray3); color: var(--white); }
+.msg-bubble {
+  max-width: 78%; padding: 10px 14px; border-radius: 12px;
+  font-size: 0.81rem; line-height: 1.75;
+}
+.msg.bot  .msg-bubble { background: var(--gray2); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--white); }
+.msg.user .msg-bubble { background: var(--gray3); border: 1px solid var(--border); border-top-right-radius: 4px; color: var(--white); }
+.msg-meta { font-size: 0.6rem; color: var(--gray4); margin-top: 3px; }
+.msg.user .msg-meta { text-align: right; }
+
+.answer-label { display: block; font-size: 0.66rem; font-weight: 700; color: var(--gold); margin-top: 8px; margin-bottom: 2px; letter-spacing: 0.04em; }
+.answer-note  { background: #1a160a; border-left: 2px solid var(--gold); padding: 7px 10px; border-radius: 4px; font-size: 0.74rem; color: #c8a96e; margin-top: 7px; }
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 3px 0; }
+.typing span { width: 6px; height: 6px; background: var(--gray4); border-radius: 50%; animation: bounce .9s infinite; }
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+.quick-wrap { padding: 0 16px 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+.quick-btn {
+  background: var(--gray2); color: var(--gray6);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 5px 12px; font-family: inherit;
+  font-size: 0.7rem; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+}
+.quick-btn:hover { background: var(--gold); color: var(--black); border-color: var(--gold); }
+
+.chat-input-area {
+  border-top: 1px solid var(--border); padding: 13px 16px;
+  display: flex; gap: 9px; align-items: flex-end; background: var(--black);
+}
+textarea {
+  flex: 1; resize: none;
+  border: 1px solid var(--border); border-radius: 9px;
+  padding: 9px 12px; font-family: inherit; font-size: 0.8rem;
+  color: var(--white); background: var(--gray1);
+  outline: none; line-height: 1.5; min-height: 40px; max-height: 110px;
+  transition: border-color .2s;
+}
+textarea:focus { border-color: var(--gold); }
+textarea::placeholder { color: var(--gray4); }
+.send-btn {
+  background: var(--gold); color: var(--black); border: none; border-radius: 9px;
+  padding: 9px 18px; font-family: inherit; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: opacity .2s; white-space: nowrap; height: 40px;
+}
+.send-btn:hover    { opacity: 0.85; }
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black); border-top: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-top: 40px;
+}
+.footer-left  { font-size: 11px; color: var(--gray4); line-height: 1.6; }
+.footer-right { font-size: 10px; color: var(--gray4); text-align: right; }
+.footer-right strong { color: var(--gold); }
+
+/* scrollbar */
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 10px; }
+
+@media (max-width: 600px) {
+  header, .topbar { padding: 10px 14px; }
+  main  { padding: 16px 12px 44px; }
+  .policies-grid { grid-template-columns: 1fr; }
+  .hero { padding: 22px 14px; }
+  .hero h2 { font-size: 1.2rem; }
+  .hero::before { display: none; }
+  footer { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-dot"></div>
+    <span class="topbar-name">AI POLICY ASSISTANT</span>
+  </div>
+  <span class="demo-badge">DEMO</span>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo-mark">PA</div>
+    <div class="header-title">
+      <h1>AI Policy Assistant</h1>
+      <p>Intelligent governance & compliance support</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="powered-by">POWERED BY CLAUDE AI</span>
+    <span class="version-badge">v1.0 Demo</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Enterprise Governance Solution</div>
+    <h2>Your policies.<br><span>Answered instantly.</span></h2>
+    <p>Ask any compliance question in plain language — get an instant, structured answer grounded exclusively in your organization's approved policies.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">POLICIES COVERED</span></div>
+      <div class="stat"><span class="stat-num">&lt;3s</span><span class="stat-label">RESPONSE TIME</span></div>
+      <div class="stat"><span class="stat-num">100%</span><span class="stat-label">POLICY-GROUNDED</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <p class="section-eyebrow">Covered Policies</p>
+  <div class="policies-grid">
+    <div class="policy-card">
+      <div class="policy-num">POLICY 01</div>
+      <div class="policy-icon">⚖️</div>
+      <h3>Conflict of Interest</h3>
+      <p>Governing relationships between related parties and organizational interests, including disclosure requirements and sanctions.</p>
+      <div class="policy-topics">
+        <span class="topic-tag">Disclosure</span>
+        <span class="topic-tag">Declarations</span>
+        <span class="topic-tag">Sanctions</span>
+        <span class="topic-tag">Gifts</span>
+      </div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-num">POLICY 02</div>
+      <div class="policy-icon">🔒</div>
+      <h3>Data Privacy</h3>
+      <p>Protecting personal data of beneficiaries, donors, volunteers, and all individuals connected with the organization.</p>
+      <div class="policy-topics">
+        <span class="topic-tag">Confidentiality</span>
+        <span class="topic-tag">Retention</span>
+        <span class="topic-tag">Access Control</span>
+      </div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-num">POLICY 03</div>
+      <div class="policy-icon">🗂️</div>
+      <h3>Document Retention</h3>
+      <p>Managing organizational records, defining retention periods, and governing official disposal procedures.</p>
+      <div class="policy-topics">
+        <span class="topic-tag">5 / 10 Years</span>
+        <span class="topic-tag">Permanent</span>
+        <span class="topic-tag">Disposal</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="section-eyebrow">Ask a Policy Question</p>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-status-dot"></div>
+        <span>Assistant active — answers grounded in approved policies only</span>
+      </div>
+      <div class="chat-header-right">DEMO MODE</div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg bot">
+        <div class="msg-avatar">AI</div>
+        <div>
+          <div class="msg-bubble">
+            Hello! I'm your AI Policy Assistant.<br>
+            I can answer questions based on three approved policies:<br>
+            <strong>Conflict of Interest · Data Privacy · Document Retention</strong><br><br>
+            Try asking a question below, or use one of the quick examples.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-wrap" id="quickWrap">
+      <button class="quick-btn" onclick="quickAsk('Do I need to disclose if my brother is a vendor?')">Brother is a vendor — disclose?</button>
+      <button class="quick-btn" onclick="quickAsk('How long must financial documents be kept?')">Financial document retention</button>
+      <button class="quick-btn" onclick="quickAsk('What gifts are permitted without a declaration?')">Permitted gifts</button>
+      <button class="quick-btn" onclick="quickAsk('Who is authorized to access donor data?')">Donor data access</button>
+      <button class="quick-btn" onclick="quickAsk('How are documents officially disposed of?')">Document disposal process</button>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea id="userInput" placeholder="Ask about any policy…" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send →</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-left">
+    Answers are guidance only, based on approved policies.<br>
+    Consult the relevant authority within your organization for official decisions.
+  </div>
+  <div class="footer-right">
+    <strong>AI Policy Assistant</strong><br>
+    Powered by Claude AI · Demo Version
+  </div>
+</footer>
+
+<script>
+let messages = [];
+
+function formatResponse(text) {
+  return text
+    .replace(/\* Short Answer:\s*/g, '<span class="answer-label">✦ SHORT ANSWER</span>')
+    .replace(/\* Related Policy:\s*/g, '<span class="answer-label">📄 RELATED POLICY</span>')
+    .replace(/\* Explanation:\s*/g, '<span class="answer-label">💡 EXPLANATION</span>')
+    .replace(/\* Note:\s*(.+)/g, '<div class="answer-note">⚠️ $1</div>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMessage(role, content) {
+  const box = document.getElementById('chatMessages');
+  const isBot = role === 'assistant';
+  const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = `msg ${isBot ? 'bot' : 'user'}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${isBot ? 'AI' : 'You'}</div>
+    <div>
+      <div class="msg-bubble">${isBot ? formatResponse(content) : content}</div>
+      <div class="msg-meta">${now}</div>
+    </div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function addTyping() {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar">AI</div><div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const btn   = document.getElementById('sendBtn');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  document.getElementById('quickWrap').style.display = 'none';
+  addMessage('user', text);
+  messages.push({ role: 'user', content: text });
+  input.value = ''; input.style.height = 'auto';
+  btn.disabled = true;
+  addTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+    const data = await res.json();
+    removeTyping();
+    const reply = data.reply || 'Sorry, could not get a response. Please try again.';
+    addMessage('assistant', reply);
+    messages.push({ role: 'assistant', content: reply });
+  } catch {
+    removeTyping();
+    addMessage('assistant', 'Connection error. Please try again.');
+  }
+  btn.disabled = false;
+}
+
+function quickAsk(q) {
+  document.getElementById('userInput').value = q;
+  sendMessage();
+}
+</script>
+</body>
+</html>
