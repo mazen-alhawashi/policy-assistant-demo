@@ -3,396 +3,634 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Policy Assistant — Demo</title>
+<title>Policy AI Assistant — Demo</title>
+<link rel="icon" type="image/png" href="/assets/policy-ai-logo.png">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --black:   #0a0a0a;
-  --gray1:   #141414;
-  --gray2:   #1e1e1e;
-  --gray3:   #2c2c2c;
-  --gray4:   #444;
-  --gray5:   #888;
-  --gray6:   #ccc;
-  --white:   #ffffff;
-  --gold:    #C8A96E;
-  --gold-lt: #fdf6e8;
-  --border:  #2a2a2a;
-  --bg:      #0f0f0f;
+  --black:     #000000;
+  --near-black:#050505;
+  --panel:     rgba(255,255,255,0.045);
+  --panel-2:   rgba(255,255,255,0.07);
+  --line:      rgba(255,255,255,0.10);
+  --line-soft: rgba(255,255,255,0.06);
+  --white:     #ffffff;
+  --gray-100:  #f2f2f2;
+  --gray-300:  #cfcfcf;
+  --gray-400:  #a3a3a3;
+  --gray-500:  #7a7a7a;
+  --gray-600:  #565656;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --container: 1120px;
 }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', sans-serif;
-  background: var(--bg);
+  background: var(--black);
   color: var(--white);
   min-height: 100vh;
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* ── TOP BAR ── */
-.topbar {
-  background: var(--black);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.topbar-brand { display: flex; align-items: center; gap: 10px; }
-.topbar-dot   { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
-.topbar-name  { font-size: 12px; font-weight: 600; color: var(--gray6); letter-spacing: 0.08em; }
-.demo-badge {
-  background: transparent; border: 1px solid var(--gold);
-  color: var(--gold); font-size: 10px; font-weight: 700;
-  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.1em;
+/* grain texture overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 2;
+  opacity: 0.035; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ── HEADER ── */
-header {
-  background: var(--black);
-  border-bottom: 1px solid var(--border);
+/* decorative glow orbs */
+.glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; }
+.glow-1 { width: 560px; height: 560px; top: -220px; right: -120px; background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%); }
+.glow-2 { width: 420px; height: 420px; top: 260px; left: -160px; background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%); }
+.glow-3 { width: 500px; height: 500px; bottom: -200px; right: 10%; background: radial-gradient(circle, rgba(255,255,255,0.07), transparent 70%); }
+
+button, textarea { font-family: inherit; }
+button { cursor: pointer; }
+
+:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; border-radius: 4px; }
+svg { display: block; }
+
+/* ── NAV ── */
+nav {
+  position: relative; z-index: 3;
+  border-bottom: 1px solid var(--line-soft);
   padding: 18px 32px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  backdrop-filter: blur(12px);
 }
-.header-left { display: flex; align-items: center; gap: 16px; }
-.logo-mark {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: var(--gold);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 800; color: var(--black);
-  letter-spacing: -0.5px;
+.nav-left { display: flex; align-items: center; gap: 11px; }
+.nav-mark {
+  height: 30px; width: auto; border-radius: 6px; display: block;
+  box-shadow: 0 4px 14px -4px rgba(255,255,255,0.2);
 }
-.header-title h1 { font-size: 1rem; font-weight: 700; color: var(--white); }
-.header-title p  { font-size: 0.7rem; color: var(--gray5); margin-top: 2px; letter-spacing: 0.02em; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.powered-by { font-size: 10px; color: var(--gray4); letter-spacing: 0.06em; }
-.version-badge {
-  background: var(--gray2); border: 1px solid var(--border);
-  color: var(--gray5); font-size: 10px; font-weight: 600;
-  padding: 3px 10px; border-radius: 20px;
+.nav-name { font-size: 0.9rem; font-weight: 600; letter-spacing: -0.01em; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.pill {
+  font-size: 11px; font-weight: 600; color: var(--gray-300);
+  border: 1px solid var(--line); border-radius: 20px; padding: 5px 11px;
+  letter-spacing: 0.01em; background: var(--panel);
 }
+.pill-live { display: flex; align-items: center; gap: 6px; }
+.pill-live .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px 1px rgba(74,222,128,0.7); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+/* ── PAGE ── */
+main { position: relative; z-index: 1; max-width: var(--container); margin: 0 auto; padding: 0 24px; }
 
 /* ── HERO ── */
 .hero {
-  background: linear-gradient(135deg, var(--black) 0%, var(--gray1) 50%, #1a1a0f 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 32px 32px;
-  position: relative; overflow: hidden;
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 64px 0 44px;
 }
-.hero::before {
-  content: 'GOVERNANCE';
-  position: absolute; top: -10px; right: -20px;
-  font-size: 100px; font-weight: 800; color: rgba(200,169,110,0.04);
-  letter-spacing: -3px; pointer-events: none;
-  white-space: nowrap;
+.hero-copy { display: flex; flex-direction: column; align-items: center; max-width: 700px; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+  font-size: 12px; font-weight: 600; color: var(--gray-300); letter-spacing: 0.02em;
+  margin-bottom: 22px; padding: 6px 12px 6px 8px; border-radius: 20px;
+  background: var(--panel); border: 1px solid var(--line);
 }
-.hero-inner { max-width: 1040px; margin: 0 auto; position: relative; z-index: 1; }
-.hero-eyebrow { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
-.hero h2 { font-size: 1.6rem; font-weight: 700; color: var(--white); margin-bottom: 10px; line-height: 1.25; }
-.hero h2 span { color: var(--gold); }
-.hero p  { font-size: 0.82rem; color: var(--gray5); line-height: 1.7; max-width: 560px; }
-.hero-stats { display: flex; gap: 28px; margin-top: 20px; flex-wrap: wrap; }
-.stat { display: flex; flex-direction: column; }
-.stat-num   { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
-.stat-label { font-size: 10px; color: var(--gray5); letter-spacing: 0.05em; margin-top: 2px; }
+.hero-eyebrow .spark { width: 14px; height: 14px; color: var(--white); }
+.hero-copy h1 {
+  font-size: 2.7rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.14; margin-bottom: 18px;
+}
+.hero-copy h1 .accent {
+  background: linear-gradient(180deg, #fff, #8a8a8a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-copy p { font-size: 0.98rem; color: var(--gray-400); line-height: 1.7; max-width: 520px; margin-bottom: 32px; }
+.hero-stats { display: flex; gap: 0; justify-content: center; border-top: 1px solid var(--line-soft); }
+.istat { padding: 18px 28px 0; flex: 0 0 auto; }
+.istat:not(:last-child) { border-right: 1px solid var(--line-soft); }
+.istat b {
+  font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; display: block;
+  background: linear-gradient(180deg, #fff, #b5b5b5); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.istat span { font-size: 11.5px; color: var(--gray-500); font-weight: 500; }
 
-/* ── MAIN ── */
-main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 56px; }
+/* ── CHAT SECTION (centered, standalone, mid-page) ── */
+.chat-section {
+  position: relative; z-index: 1;
+  display: flex; justify-content: center;
+  padding: 8px 0 56px; border-bottom: 1px solid var(--line-soft);
+}
+.chat-section .chat-container { width: 100%; max-width: 720px; }
 
-.section-eyebrow {
-  font-size: 10px; font-weight: 700; color: var(--gold);
-  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px;
-}
-
-/* ── POLICY CARDS ── */
-.policies-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
-  gap: 14px; margin-bottom: 32px;
-}
-.policy-card {
-  background: var(--gray1);
-  border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 18px;
-  position: relative; overflow: hidden;
-  transition: border-color .2s, transform .2s;
-}
-.policy-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-.policy-card::before {
-  content: ''; position: absolute; top: 0; left: 0;
-  width: 3px; height: 100%;
-  background: var(--gold); border-radius: 12px 0 0 12px;
-  opacity: 0; transition: opacity .2s;
-}
-.policy-card:hover::before { opacity: 1; }
-.policy-num  { font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 10px; }
-.policy-icon { font-size: 22px; margin-bottom: 12px; }
-.policy-card h3 { font-size: 0.88rem; font-weight: 600; color: var(--white); margin-bottom: 6px; }
-.policy-card p  { font-size: 0.74rem; color: var(--gray5); line-height: 1.7; }
-.policy-topics  { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
-.topic-tag {
-  background: var(--gray2); border: 1px solid var(--border);
-  color: var(--gray6); font-size: 0.62rem; font-weight: 500;
-  padding: 2px 9px; border-radius: 20px;
-}
-
-/* ── DIVIDER ── */
-.divider { border: none; border-top: 1px solid var(--border); margin: 26px 0; }
-
-/* ── CHAT ── */
+/* ── CHAT (glass hero panel) ── */
 .chat-container {
-  background: var(--gray1); border: 1px solid var(--border);
-  border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 520px;
+  border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--panel);
+  backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 40px 70px -30px rgba(0,0,0,0.85), 0 0 50px -18px rgba(255,255,255,0.10);
 }
 .chat-header {
-  background: var(--black); border-bottom: 1px solid var(--border);
-  padding: 13px 18px; display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 19px; border-bottom: 1px solid var(--line-soft);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
 }
-.chat-header-left { display: flex; align-items: center; gap: 8px; }
-.chat-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-.chat-header span { font-size: 0.78rem; font-weight: 600; color: var(--gray6); }
-.chat-header-right { font-size: 10px; color: var(--gray4); }
+.chat-header-left { display: flex; align-items: center; gap: 10px; }
+.chat-mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+  border: 1px solid var(--line); color: var(--white);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.chat-mark svg { width: 15px; height: 15px; }
+.chat-header-text { display: flex; flex-direction: column; }
+.chat-header-text b { font-size: 0.83rem; font-weight: 600; color: var(--white); line-height: 1.2; }
+.chat-header-text span { font-size: 10.5px; color: var(--gray-500); display: flex; align-items: center; gap: 5px; }
+.chat-status-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px 1px rgba(74,222,128,0.7); animation: pulse 2s infinite; flex-shrink: 0; }
 
 .chat-messages {
-  padding: 18px 16px; display: flex; flex-direction: column;
-  gap: 14px; min-height: 160px; max-height: 420px; overflow-y: auto;
+  padding: 22px 19px; display: flex; flex-direction: column;
+  gap: 18px; flex: 1; overflow-y: auto;
 }
-.msg { display: flex; gap: 9px; align-items: flex-start; }
+.msg { display: flex; gap: 10px; align-items: flex-start; }
 .msg.user { flex-direction: row-reverse; }
 .msg-avatar {
-  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.02em; margin-top: 1px;
 }
-.msg.bot  .msg-avatar { background: var(--gold); color: var(--black); }
-.msg.user .msg-avatar { background: var(--gray3); color: var(--white); }
+.msg.bot  .msg-avatar { background: linear-gradient(150deg, var(--white), var(--gray-300)); color: var(--black); box-shadow: 0 3px 10px -3px rgba(255,255,255,0.3); }
+.msg.user .msg-avatar { background: var(--panel-2); border: 1px solid var(--line); color: var(--gray-300); }
 .msg-bubble {
-  max-width: 78%; padding: 10px 14px; border-radius: 12px;
-  font-size: 0.81rem; line-height: 1.75;
+  max-width: 84%; padding: 12px 15px; border-radius: var(--radius-md);
+  font-size: 0.85rem; line-height: 1.68;
 }
-.msg.bot  .msg-bubble { background: var(--gray2); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--white); }
-.msg.user .msg-bubble { background: var(--gray3); border: 1px solid var(--border); border-top-right-radius: 4px; color: var(--white); }
-.msg-meta { font-size: 0.6rem; color: var(--gray4); margin-top: 3px; }
+.msg.bot  .msg-bubble { background: var(--panel); border: 1px solid var(--line-soft); color: var(--gray-100); }
+.msg.user .msg-bubble { background: var(--white); color: var(--black); font-weight: 500; box-shadow: 0 6px 18px -8px rgba(255,255,255,0.25); }
+.msg-meta { font-size: 0.63rem; color: var(--gray-600); margin-top: 5px; font-weight: 500; }
 .msg.user .msg-meta { text-align: right; }
 
-.answer-label { display: block; font-size: 0.66rem; font-weight: 700; color: var(--gold); margin-top: 8px; margin-bottom: 2px; letter-spacing: 0.04em; }
-.answer-note  { background: #1a160a; border-left: 2px solid var(--gold); padding: 7px 10px; border-radius: 4px; font-size: 0.74rem; color: #c8a96e; margin-top: 7px; }
+.answer-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.66rem; font-weight: 700; color: var(--white);
+  margin-top: 11px; margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.answer-label:first-child { margin-top: 0; }
+.answer-label svg { width: 12px; height: 12px; flex-shrink: 0; }
+.answer-note {
+  display: flex; gap: 8px; align-items: flex-start;
+  border: 1px solid var(--line); padding: 9px 12px; border-radius: var(--radius-sm);
+  font-size: 0.77rem; color: var(--gray-300); margin-top: 9px; background: var(--panel-2);
+}
+.answer-note svg { width: 12.5px; height: 12.5px; flex-shrink: 0; margin-top: 2px; color: var(--white); }
 
 .typing { display: flex; gap: 4px; align-items: center; padding: 3px 0; }
-.typing span { width: 6px; height: 6px; background: var(--gray4); border-radius: 50%; animation: bounce .9s infinite; }
+.typing span { width: 5px; height: 5px; background: var(--gray-400); border-radius: 50%; animation: bounce .9s infinite; }
 .typing span:nth-child(2) { animation-delay: .2s; }
 .typing span:nth-child(3) { animation-delay: .4s; }
 @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
 
-.quick-wrap { padding: 0 16px 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+.quick-wrap { padding: 0 19px 16px; display: flex; flex-wrap: wrap; gap: 8px; }
 .quick-btn {
-  background: var(--gray2); color: var(--gray6);
-  border: 1px solid var(--border); border-radius: 20px;
-  padding: 5px 12px; font-family: inherit;
-  font-size: 0.7rem; font-weight: 500;
-  cursor: pointer; transition: all .15s;
+  background: var(--panel); color: var(--gray-300);
+  border: 1px solid var(--line); border-radius: 20px;
+  padding: 8px 13px; font-size: 0.73rem; font-weight: 500;
+  min-height: 34px; display: inline-flex; align-items: center;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.quick-btn:hover { background: var(--gold); color: var(--black); border-color: var(--gold); }
+.quick-btn:hover { background: var(--white); color: var(--black); border-color: var(--white); box-shadow: 0 6px 16px -6px rgba(255,255,255,0.35); }
 
 .chat-input-area {
-  border-top: 1px solid var(--border); padding: 13px 16px;
-  display: flex; gap: 9px; align-items: flex-end; background: var(--black);
+  border-top: 1px solid var(--line-soft); padding: 14px 16px;
+  display: flex; gap: 9px; align-items: flex-end;
+  background: linear-gradient(0deg, rgba(255,255,255,0.03), transparent);
 }
 textarea {
   flex: 1; resize: none;
-  border: 1px solid var(--border); border-radius: 9px;
-  padding: 9px 12px; font-family: inherit; font-size: 0.8rem;
-  color: var(--white); background: var(--gray1);
-  outline: none; line-height: 1.5; min-height: 40px; max-height: 110px;
-  transition: border-color .2s;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 11px 14px; font-size: 0.85rem;
+  color: var(--white); background: var(--panel-2);
+  outline: none; line-height: 1.5; min-height: 44px; max-height: 110px;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
-textarea:focus { border-color: var(--gold); }
-textarea::placeholder { color: var(--gray4); }
+textarea:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.07); }
+textarea::placeholder { color: var(--gray-600); }
 .send-btn {
-  background: var(--gold); color: var(--black); border: none; border-radius: 9px;
-  padding: 9px 18px; font-family: inherit; font-size: 0.8rem; font-weight: 700;
-  cursor: pointer; transition: opacity .2s; white-space: nowrap; height: 40px;
+  background: linear-gradient(150deg, var(--white), var(--gray-100)); color: var(--black); border: none; border-radius: var(--radius-md);
+  padding: 0 18px; font-size: 0.82rem; font-weight: 700;
+  transition: transform .15s ease, box-shadow .15s ease; white-space: nowrap; height: 44px;
+  display: inline-flex; align-items: center; gap: 7px;
+  box-shadow: 0 8px 20px -8px rgba(255,255,255,0.35);
 }
-.send-btn:hover    { opacity: 0.85; }
-.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.send-btn svg { width: 14px; height: 14px; }
+.send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px -8px rgba(255,255,255,0.5); }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── SECTION ── */
+.section { position: relative; z-index: 1; padding: 56px 0; }
+.section + .section { border-top: 1px solid var(--line-soft); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 26px; flex-wrap: wrap; }
+.section-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.015em; }
+.section-note { font-size: 0.78rem; color: var(--gray-500); }
+
+/* ── POLICY GRID ── */
+.policies-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.policy-card {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 24px 22px; background: var(--panel);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 40px -28px rgba(0,0,0,0.7);
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.policy-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  opacity: 0; transition: opacity .2s ease;
+}
+.policy-card:hover { border-color: rgba(255,255,255,0.28); transform: translateY(-3px); background: var(--panel-2); box-shadow: 0 26px 50px -24px rgba(0,0,0,0.8), 0 0 30px -14px rgba(255,255,255,0.12); }
+.policy-card:hover::before { opacity: 1; }
+.policy-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+.policy-icon-chip {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 18px -10px rgba(0,0,0,0.6);
+}
+.policy-icon-chip svg { width: 20px; height: 20px; color: var(--white); }
+.policy-num { font-size: 10.5px; font-weight: 600; color: var(--gray-500); letter-spacing: 0.08em; }
+.policy-card h3 { font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 9px; }
+.policy-card p { font-size: 0.82rem; color: var(--gray-400); line-height: 1.62; margin-bottom: 16px; }
+.policy-topics { display: flex; flex-wrap: wrap; gap: 7px; }
+.topic-tag {
+  font-size: 10.5px; font-weight: 500; color: var(--gray-300);
+  background: var(--panel-2); border: 1px solid var(--line);
+  padding: 3px 9px; border-radius: 20px;
+}
 
 /* ── FOOTER ── */
 footer {
-  background: var(--black); border-top: 1px solid var(--border);
-  padding: 20px 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 10px; margin-top: 40px;
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--line-soft);
+  padding: 26px 0 56px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
 }
-.footer-left  { font-size: 11px; color: var(--gray4); line-height: 1.6; }
-.footer-right { font-size: 10px; color: var(--gray4); text-align: right; }
-.footer-right strong { color: var(--gold); }
+.footer-left  { font-size: 11.5px; color: var(--gray-600); line-height: 1.7; max-width: 440px; }
+.footer-right { font-size: 11px; color: var(--gray-600); text-align: right; line-height: 1.7; }
+.footer-right strong { color: var(--gray-300); font-weight: 600; }
 
-/* scrollbar */
-.chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 10px; }
+/* ── OFFICIAL REGISTRATION & CONTACT ── */
+.official {
+  position: relative; z-index: 1;
+  background: var(--near-black);
+  border-top: 1px solid var(--line);
+  padding: 48px 0 60px;
+}
+.official-inner { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+.official-head { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; flex-wrap: wrap; }
+.official-logo { height: 46px; width: auto; border-radius: 6px; box-shadow: 0 4px 14px -4px rgba(255,255,255,0.15); }
+.official-head-text { display: flex; flex-direction: column; gap: 3px; }
+.official-eyebrow { font-size: 0.98rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
+.official-sub { font-size: 12.5px; color: var(--gray-500); }
 
-@media (max-width: 600px) {
-  header, .topbar { padding: 10px 14px; }
-  main  { padding: 16px 12px 44px; }
+.official-grid { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 16px; align-items: stretch; }
+.official-card {
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--panel); backdrop-filter: blur(16px);
+  padding: 20px 20px 22px; display: flex; flex-direction: column;
+  box-shadow: 0 20px 40px -30px rgba(0,0,0,0.7);
+}
+.official-card-label {
+  display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gray-400); margin-bottom: 14px;
+}
+
+.cert-frame {
+  position: relative; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  overflow: hidden; flex: 1; min-height: 220px; background: rgba(255,255,255,0.02);
+  display: flex; align-items: center; justify-content: center; padding: 10px;
+}
+.cert-frame img { width: 100%; height: auto; max-height: 100%; object-fit: contain; display: block; border-radius: 3px; }
+.cert-missing {
+  display: none; position: absolute; inset: 0; flex-direction: column; gap: 8px;
+  align-items: center; justify-content: center; color: var(--gray-600); text-align: center; padding: 20px;
+}
+.cert-missing svg { width: 26px; height: 26px; }
+.cert-missing span { font-size: 11.5px; }
+
+.cert-dl { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.cert-dl > div { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--line-soft); padding-bottom: 8px; }
+.cert-dl dt { font-size: 11.5px; color: var(--gray-500); flex: 0 0 auto; }
+.cert-dl dd { font-size: 12.5px; color: var(--gray-100); text-align: right; font-weight: 500; }
+.cert-note { font-size: 11px; color: var(--gray-600); line-height: 1.6; margin-top: auto; }
+
+.contact-list { display: flex; flex-direction: column; gap: 10px; }
+.contact-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  color: var(--gray-200); font-size: 12.5px; font-weight: 500;
+  background: var(--panel-2); transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.contact-row:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); transform: translateX(-2px); }
+.contact-icon {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; color: var(--white);
+}
+.contact-icon svg { width: 14px; height: 14px; }
+
+@media (max-width: 900px) {
+  .official-grid { grid-template-columns: 1fr; }
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; }
+
+/* ── SCROLL REVEAL ── */
+.reveal { transition: opacity .5s ease-out, transform .5s ease-out; will-change: transform, opacity; }
+.reveal.pre { opacity: 0; transform: translateY(18px); }
+
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg { animation: msgIn .3s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+@media (max-width: 900px) {
+  .hero { padding: 44px 0 32px; }
+  .chat-section { padding: 8px 0 44px; }
+  .chat-container { min-height: 480px; }
   .policies-grid { grid-template-columns: 1fr; }
-  .hero { padding: 22px 14px; }
-  .hero h2 { font-size: 1.2rem; }
-  .hero::before { display: none; }
+  .glow-1, .glow-2, .glow-3 { display: none; }
+}
+
+@media (max-width: 640px) {
+  nav { padding: 14px 18px; }
+  main { padding: 0 16px; }
+  .hero-copy h1 { font-size: 1.7rem; }
   footer { flex-direction: column; }
+  .footer-right { text-align: left; }
+  .msg-bubble { max-width: 88%; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-dot"></div>
-    <span class="topbar-name">AI POLICY ASSISTANT</span>
-  </div>
-  <span class="demo-badge">DEMO</span>
-</div>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+<div class="glow glow-3"></div>
 
-<!-- HEADER -->
-<header>
-  <div class="header-left">
-    <div class="logo-mark">PA</div>
-    <div class="header-title">
-      <h1>AI Policy Assistant</h1>
-      <p>Intelligent governance & compliance support</p>
-    </div>
+<nav>
+  <div class="nav-left">
+    <img class="nav-mark" src="/assets/policy-ai-logo.png" alt="Policy AI Assistant logo">
+    <span class="nav-name">Policy AI Assistant</span>
   </div>
-  <div class="header-right">
-    <span class="powered-by">POWERED BY CLAUDE AI</span>
-    <span class="version-badge">v1.0 Demo</span>
+  <div class="nav-right">
+    <span class="pill pill-live"><span class="dot"></span>Active</span>
+    <span class="pill">Demo · v1.0</span>
   </div>
-</header>
+</nav>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-inner">
-    <div class="hero-eyebrow">Enterprise Governance Solution</div>
-    <h2>Your policies.<br><span>Answered instantly.</span></h2>
-    <p>Ask any compliance question in plain language — get an instant, structured answer grounded exclusively in your organization's approved policies.</p>
-    <div class="hero-stats">
-      <div class="stat"><span class="stat-num">3</span><span class="stat-label">POLICIES COVERED</span></div>
-      <div class="stat"><span class="stat-num">&lt;3s</span><span class="stat-label">RESPONSE TIME</span></div>
-      <div class="stat"><span class="stat-num">100%</span><span class="stat-label">POLICY-GROUNDED</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN -->
 <main>
 
-  <p class="section-eyebrow">Covered Policies</p>
-  <div class="policies-grid">
-    <div class="policy-card">
-      <div class="policy-num">POLICY 01</div>
-      <div class="policy-icon">⚖️</div>
-      <h3>Conflict of Interest</h3>
-      <p>Governing relationships between related parties and organizational interests, including disclosure requirements and sanctions.</p>
-      <div class="policy-topics">
-        <span class="topic-tag">Disclosure</span>
-        <span class="topic-tag">Declarations</span>
-        <span class="topic-tag">Sanctions</span>
-        <span class="topic-tag">Gifts</span>
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="hero-eyebrow">
+        <svg class="spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
+        Enterprise Governance Solution
       </div>
-    </div>
-    <div class="policy-card">
-      <div class="policy-num">POLICY 02</div>
-      <div class="policy-icon">🔒</div>
-      <h3>Data Privacy</h3>
-      <p>Protecting personal data of beneficiaries, donors, volunteers, and all individuals connected with the organization.</p>
-      <div class="policy-topics">
-        <span class="topic-tag">Confidentiality</span>
-        <span class="topic-tag">Retention</span>
-        <span class="topic-tag">Access Control</span>
-      </div>
-    </div>
-    <div class="policy-card">
-      <div class="policy-num">POLICY 03</div>
-      <div class="policy-icon">🗂️</div>
-      <h3>Document Retention</h3>
-      <p>Managing organizational records, defining retention periods, and governing official disposal procedures.</p>
-      <div class="policy-topics">
-        <span class="topic-tag">5 / 10 Years</span>
-        <span class="topic-tag">Permanent</span>
-        <span class="topic-tag">Disposal</span>
+      <h1>Ask any compliance question.<br>Get an <span class="accent">instant, grounded</span> answer.</h1>
+      <p>Plain-language answers to internal governance questions, sourced exclusively from your organization's official policy documents — right here, no searching through PDFs.</p>
+      <div class="hero-stats">
+        <div class="istat"><b>3</b><span>Policies covered</span></div>
+        <div class="istat"><b>&lt;3s</b><span>Response time</span></div>
+        <div class="istat"><b>100%</b><span>Policy-grounded</span></div>
       </div>
     </div>
   </div>
 
-  <hr class="divider">
-
-  <p class="section-eyebrow">Ask a Policy Question</p>
-  <div class="chat-container">
-    <div class="chat-header">
-      <div class="chat-header-left">
-        <div class="chat-status-dot"></div>
-        <span>Assistant active — answers grounded in approved policies only</span>
+  <div class="chat-section">
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="chat-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          <div class="chat-header-text">
+            <b>Policy AI Assistant</b>
+            <span><span class="chat-status-dot"></span>Online — answers in real time</span>
+          </div>
+        </div>
+        <span class="pill">Demo mode</span>
       </div>
-      <div class="chat-header-right">DEMO MODE</div>
-    </div>
 
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg bot">
-        <div class="msg-avatar">AI</div>
-        <div>
-          <div class="msg-bubble">
-            Hello! I'm your AI Policy Assistant.<br>
-            I can answer questions based on three approved policies:<br>
-            <strong>Conflict of Interest · Data Privacy · Document Retention</strong><br><br>
-            Try asking a question below, or use one of the quick examples.
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg bot">
+          <div class="msg-avatar">AI</div>
+          <div>
+            <div class="msg-bubble">
+              Hello! I'm your Policy AI Assistant.<br>
+              I can answer questions based on three approved policies:<br>
+              <strong>Conflict of Interest · Data Privacy · Document Retention</strong><br><br>
+              Try asking a question below, or use one of the quick examples.
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="quick-wrap" id="quickWrap">
-      <button class="quick-btn" onclick="quickAsk('Do I need to disclose if my brother is a vendor?')">Brother is a vendor — disclose?</button>
-      <button class="quick-btn" onclick="quickAsk('How long must financial documents be kept?')">Financial document retention</button>
-      <button class="quick-btn" onclick="quickAsk('What gifts are permitted without a declaration?')">Permitted gifts</button>
-      <button class="quick-btn" onclick="quickAsk('Who is authorized to access donor data?')">Donor data access</button>
-      <button class="quick-btn" onclick="quickAsk('How are documents officially disposed of?')">Document disposal process</button>
-    </div>
+      <div class="quick-wrap" id="quickWrap">
+        <button class="quick-btn" onclick="quickAsk('Do I need to disclose if my brother is a vendor?')">Brother is a vendor — disclose?</button>
+        <button class="quick-btn" onclick="quickAsk('How long must financial documents be kept?')">Financial document retention</button>
+        <button class="quick-btn" onclick="quickAsk('What gifts are permitted without a declaration?')">Permitted gifts</button>
+      </div>
 
-    <div class="chat-input-area">
-      <textarea id="userInput" placeholder="Ask about any policy…" rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send →</button>
+      <div class="chat-input-area">
+        <textarea id="userInput" placeholder="Ask about any policy…" rows="1" aria-label="Ask about any policy"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          Send
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
     </div>
   </div>
+
+  <div class="section">
+    <div class="section-head reveal">
+      <span class="section-title">Covered Policies</span>
+      <span class="section-note">3 approved documents</span>
+    </div>
+    <div class="policies-grid">
+      <div class="policy-card reveal">
+        <div class="policy-card-top">
+          <div class="policy-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v18"/><path d="M5 7h14"/>
+              <path d="M5 7 2 13a3 3 0 0 0 6 0L5 7Z"/>
+              <path d="M19 7l-3 6a3 3 0 0 0 6 0l-3-6Z"/>
+              <path d="M8 21h8"/>
+            </svg>
+          </div>
+          <span class="policy-num">01</span>
+        </div>
+        <h3>Conflict of Interest</h3>
+        <p>Governing relationships between related parties and organizational interests, including disclosure requirements and sanctions.</p>
+        <div class="policy-topics">
+          <span class="topic-tag">Disclosure</span>
+          <span class="topic-tag">Declarations</span>
+          <span class="topic-tag">Sanctions</span>
+        </div>
+      </div>
+      <div class="policy-card reveal">
+        <div class="policy-card-top">
+          <div class="policy-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="11" width="14" height="9" rx="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            </svg>
+          </div>
+          <span class="policy-num">02</span>
+        </div>
+        <h3>Data Privacy</h3>
+        <p>Protecting personal data of beneficiaries, donors, volunteers, and all individuals connected with the organization.</p>
+        <div class="policy-topics">
+          <span class="topic-tag">Confidentiality</span>
+          <span class="topic-tag">Access Control</span>
+        </div>
+      </div>
+      <div class="policy-card reveal">
+        <div class="policy-card-top">
+          <div class="policy-icon-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="5" rx="1.5"/>
+              <path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/>
+              <path d="M10 13h4"/>
+            </svg>
+          </div>
+          <span class="policy-num">03</span>
+        </div>
+        <h3>Document Retention</h3>
+        <p>Managing organizational records, defining retention periods, and governing official disposal procedures.</p>
+        <div class="policy-topics">
+          <span class="topic-tag">5 / 10 Years</span>
+          <span class="topic-tag">Disposal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="reveal">
+    <div class="footer-left">
+      Answers are guidance only, based on approved policies. Consult the relevant authority within your organization for official decisions.
+    </div>
+    <div class="footer-right">
+      <strong>Policy AI Assistant</strong><br>
+      Demo Version
+    </div>
+  </footer>
 
 </main>
 
-<footer>
-  <div class="footer-left">
-    Answers are guidance only, based on approved policies.<br>
-    Consult the relevant authority within your organization for official decisions.
+<!-- OFFICIAL REGISTRATION & CONTACT — visually separated closing section -->
+<section class="official reveal">
+  <div class="official-inner">
+
+    <div class="official-head">
+      <img class="official-logo" src="/assets/policy-ai-logo.png" alt="Policy AI Assistant">
+      <div class="official-head-text">
+        <span class="official-eyebrow">Official Registration &amp; Contact</span>
+        <span class="official-sub" dir="rtl">بيانات التسجيل الرسمي والتواصل</span>
+      </div>
+    </div>
+
+    <div class="official-grid">
+
+      <!-- Arabic certificate scan -->
+      <div class="official-card cert-card">
+        <span class="official-card-label" dir="rtl">شهادة تسجيل المصنف</span>
+        <div class="cert-frame">
+          <img src="/assets/certificate-ar.png" alt="شهادة تسجيل مصنف — الهيئة السعودية للملكية الفكرية"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="cert-missing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/></svg>
+            <span>Certificate image pending upload</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- English registration details -->
+      <div class="official-card">
+        <span class="official-card-label">Registration Details (English)</span>
+        <dl class="cert-dl">
+          <div><dt>Issuing Authority</dt><dd>Saudi Authority for Intellectual Property (SAIP)</dd></div>
+          <div><dt>Certificate</dt><dd>Work Registration Certificate</dd></div>
+          <div><dt>Registration No.</dt><dd>26-12-87854054</dd></div>
+          <div><dt>Work Title</dt><dd>Smart Assistant for Policies &amp; Governance</dd></div>
+          <div><dt>Work Category</dt><dd>Computer Software &amp; Application Works</dd></div>
+          <div><dt>Author</dt><dd>Mazen Nasser Ali Alhawashi</dd></div>
+          <div><dt>Rights Holder</dt><dd>Mazen Nasser Ali Alhawashi</dd></div>
+          <div><dt>Registration Date</dt><dd>07/01/1448 H — 22/06/2026 CE</dd></div>
+        </dl>
+        <p class="cert-note">System-generated document, no signature required. Does not authorize exploitation, distribution, display, or publication of the work.</p>
+      </div>
+
+      <!-- Contact -->
+      <div class="official-card">
+        <span class="official-card-label">Contact Us</span>
+        <div class="contact-list">
+          <a class="contact-row" href="tel:+966598088960">
+            <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
+            <span>(+966) 0598088960</span>
+          </a>
+          <a class="contact-row" href="mailto:policy.ai.req@gmail.com">
+            <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+            <span>policy.ai.req@gmail.com</span>
+          </a>
+          <a class="contact-row" href="https://www.linkedin.com/company/policy-ai-assistant/" target="_blank" rel="noopener noreferrer">
+            <span class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6Z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
+            <span>linkedin.com/company/policy-ai-assistant</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <div class="footer-right">
-    <strong>AI Policy Assistant</strong><br>
-    Powered by Claude AI · Demo Version
-  </div>
-</footer>
+</section>
 
 <script>
 let messages = [];
 
+const ICONS = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3L16 9.8"/></svg>',
+  doc:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>',
+  info:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 20H3L12 3.5Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>'
+};
+
 function formatResponse(text) {
   return text
-    .replace(/\* Short Answer:\s*/g, '<span class="answer-label">✦ SHORT ANSWER</span>')
-    .replace(/\* Related Policy:\s*/g, '<span class="answer-label">📄 RELATED POLICY</span>')
-    .replace(/\* Explanation:\s*/g, '<span class="answer-label">💡 EXPLANATION</span>')
-    .replace(/\* Note:\s*(.+)/g, '<div class="answer-note">⚠️ $1</div>')
+    .replace(/\* Short Answer:\s*/g, `<span class="answer-label">${ICONS.check} Short Answer</span>`)
+    .replace(/\* Related Policy:\s*/g, `<span class="answer-label">${ICONS.doc} Related Policy</span>`)
+    .replace(/\* Explanation:\s*/g, `<span class="answer-label">${ICONS.info} Explanation</span>`)
+    .replace(/\* Note:\s*(.+)/g, `<div class="answer-note">${ICONS.alert}<span>$1</span></div>`)
     .replace(/\n/g, '<br>');
 }
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function addMessage(role, content) {
   const box = document.getElementById('chatMessages');
@@ -459,6 +697,32 @@ function quickAsk(q) {
   document.getElementById('userInput').value = q;
   sendMessage();
 }
+
+/* Scroll reveal for below-the-fold content — elements are fully visible by
+   default in HTML/CSS; JS only adds the "pre" (hidden) state, so nothing
+   breaks if JS fails to run. Staggers policy cards via transition-delay. */
+(function initScrollReveal() {
+  if (reduceMotion || !('IntersectionObserver' in window)) return;
+
+  const revealEls = Array.from(document.querySelectorAll('.reveal'));
+  revealEls.forEach(el => el.classList.add('pre'));
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const group = el.closest('.policies-grid');
+      if (group) {
+        const idx = Array.from(group.children).indexOf(el);
+        el.style.transitionDelay = (idx * 70) + 'ms';
+      }
+      requestAnimationFrame(() => el.classList.remove('pre'));
+      io.unobserve(el);
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => io.observe(el));
+})();
 </script>
 </body>
 </html>
